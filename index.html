@@ -107,7 +107,7 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      padding: 0.9rem 1.5rem;
+      padding: 0.75rem 1.5rem 0.9rem;
     }
 
     .header-container {
@@ -118,6 +118,16 @@
       align-items: center;
       gap: 1rem;
       flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+
+    /* Controls live inside header */
+    .header-controls {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
     }
 
     .brand {
@@ -157,8 +167,8 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       background: var(--bg-subtle);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
@@ -172,40 +182,88 @@
       color: var(--primary);
     }
 
-    .btn-action {
+    /* Download dropdown */
+    .download-wrap {
+      position: relative;
+    }
+
+    .btn-download {
       display: inline-flex;
       align-items: center;
       gap: 0.4rem;
-      background: var(--bg-subtle);
-      border: 1px solid var(--border);
-      color: var(--text-muted);
+      background: var(--primary);
+      border: 1px solid var(--primary);
+      color: #fff;
       font-family: inherit;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 0.82rem;
       padding: 0.5rem 0.9rem;
       border-radius: var(--radius-sm);
-      text-decoration: none;
       cursor: pointer;
       transition: all 0.2s ease;
+      white-space: nowrap;
     }
 
-    .btn-action:hover {
-      border-color: var(--primary);
+    .btn-download:hover {
+      background: #b36c10;
+      border-color: #b36c10;
+    }
+
+    .btn-download .caret {
+      font-size: 0.65rem;
+      opacity: 0.8;
+      transition: transform 0.2s;
+    }
+
+    .download-wrap.open .caret {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      min-width: 180px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      overflow: hidden;
+      z-index: 200;
+    }
+
+    .download-wrap.open .dropdown-menu {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+
+    .dropdown-item:hover {
+      background: var(--primary-bg);
       color: var(--primary);
     }
 
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-      font-weight: 700;
+    .dropdown-item + .dropdown-item {
+      border-top: 1px solid var(--border);
     }
 
-    .btn-primary:hover {
-      background: #b36c10;
-      border-color: #b36c10;
-      color: #fff;
-      transform: translateY(-1px);
+    .dropdown-item .item-sub {
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--text-faint);
+      display: block;
+      margin-top: 1px;
     }
 
     /* ─── Main ────────────────────────────────────────────────────── */
@@ -558,30 +616,34 @@
           <svg id="iconLight" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
         </button>
 
-        <a href="events.json" class="btn-action" target="_blank" title="Abrir events.json">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          JSON
-        </a>
-
-        <a href="tradidancas2026.ics" class="btn-action btn-primary" download>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Download .ICS
-        </a>
+        <!-- Download dropdown -->
+        <div class="download-wrap" id="downloadWrap">
+          <button class="btn-download" id="downloadToggle" aria-haspopup="true" aria-expanded="false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+            <span class="caret">▾</span>
+          </button>
+          <div class="dropdown-menu" role="menu">
+            <a href="tradidancas2026.ics" class="dropdown-item" download role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span>
+                Calendário .ICS
+                <span class="item-sub">Apple, Google, Outlook…</span>
+              </span>
+            </a>
+            <a href="events.json" class="dropdown-item" target="_blank" rel="noopener" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>
+                Dados JSON
+                <span class="item-sub">301 eventos, formato aberto</span>
+              </span>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
-  </header>
-
-  <main>
-    <!-- Unofficial disclaimer -->
-    <div class="disclaimer-banner" role="note">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-      <div>
-        Este programa <strong>não é oficial</strong>. É uma ferramenta independente criada com base na programação pública. Para informações oficiais, consulte <a href="https://tradidancas.pt" target="_blank" rel="noopener noreferrer">tradidancas.pt</a>.
-      </div>
-    </div>
-
-    <!-- Controls -->
-    <div class="controls">
+    <!-- Controls (sticky, inside header) -->
+    <div class="header-controls">
       <div class="search-bar">
         <svg class="search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <input type="text" id="searchInput" placeholder="Pesquisar por artista, oficina, palco…" autocomplete="off">
@@ -603,6 +665,16 @@
         <select id="catFilter" class="select-filter" aria-label="Filtrar por categoria">
           <option value="all">Todas as categorias</option>
         </select>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Unofficial disclaimer -->
+    <div class="disclaimer-banner" role="note">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        Este programa <strong>não é oficial</strong>. É uma ferramenta independente criada com base na programação pública. Para informações oficiais, consulte <a href="https://tradidancas.pt" target="_blank" rel="noopener noreferrer">tradidancas.pt</a>.
       </div>
     </div>
 
@@ -635,6 +707,27 @@
       html.setAttribute('data-theme', next);
       localStorage.setItem('tradi-theme', next);
       syncThemeIcons();
+    });
+
+    /* ── Download dropdown ── */
+    const downloadWrap   = document.getElementById('downloadWrap');
+    const downloadToggle = document.getElementById('downloadToggle');
+
+    downloadToggle.addEventListener('click', e => {
+      e.stopPropagation();
+      const open = downloadWrap.classList.toggle('open');
+      downloadToggle.setAttribute('aria-expanded', open);
+    });
+
+    document.addEventListener('click', () => {
+      downloadWrap.classList.remove('open');
+      downloadToggle.setAttribute('aria-expanded', 'false');
+    });
+
+    downloadWrap.querySelector('.dropdown-menu').addEventListener('click', e => {
+      e.stopPropagation();
+      downloadWrap.classList.remove('open');
+      downloadToggle.setAttribute('aria-expanded', 'false');
     });
 
     /* ── Data & state ── */
