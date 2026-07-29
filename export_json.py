@@ -1,8 +1,14 @@
 import json
 from fetch_and_enrich import events
 
-# Generate HTML file
-html_template = """<!DOCTYPE html>
+# 1. Save formatted events.json
+with open("events.json", "w", encoding="utf-8") as f:
+    json.dump(events, f, indent=2, ensure_ascii=False)
+
+print("Saved formatted events.json successfully.")
+
+# 2. Update index.html to fetch events.json dynamically
+html_content = """<!DOCTYPE html>
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
@@ -95,22 +101,40 @@ html_template = """<!DOCTYPE html>
       border: 1px solid var(--border-color);
     }
 
-    .btn-download {
+    .header-buttons {
+      display: flex;
+      gap: 0.6rem;
+    }
+
+    .btn-action {
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: #0f172a;
-      font-weight: 700;
+      gap: 0.4rem;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
       font-size: 0.85rem;
-      padding: 0.55rem 1.1rem;
+      padding: 0.55rem 1rem;
       border-radius: var(--radius-md);
       text-decoration: none;
       transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: rgba(51, 65, 85, 0.9);
+      border-color: var(--primary);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a;
+      border: none;
+      font-weight: 700;
       box-shadow: 0 4px 14px rgba(245, 158, 11, 0.25);
     }
 
-    .btn-download:hover {
+    .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 18px rgba(245, 158, 11, 0.35);
     }
@@ -265,7 +289,7 @@ html_template = """<!DOCTYPE html>
       border-color: rgba(245, 158, 11, 0.4);
     }
 
-    /* PAST EVENTS STYLING: Faded / Grayed out */
+    /* PAST EVENTS STYLING */
     .event-card.is-past {
       opacity: 0.45;
       filter: grayscale(85%);
@@ -293,7 +317,6 @@ html_template = """<!DOCTYPE html>
       background: var(--primary);
     }
 
-    /* Category indicator colors */
     .event-card[data-cat*="Dança"]::before { background: #f59e0b; }
     .event-card[data-cat*="Concertos"]::before { background: #ec4899; }
     .event-card[data-cat*="Bailes"]::before { background: #8b5cf6; }
@@ -364,7 +387,6 @@ html_template = """<!DOCTYPE html>
       color: var(--primary);
     }
 
-    /* COLLAPSED / EXPANDED DESCRIPTION LOGIC */
     .event-desc {
       font-size: 0.92rem;
       color: var(--text-muted);
@@ -439,9 +461,13 @@ html_template = """<!DOCTYPE html>
         <h1>TRADIDANÇAS 2026</h1>
         <span class="dates">29 Jul - 2 Ago</span>
       </div>
-      <div class="header-actions">
-        <a href="tradidancas2026.ics" class="btn-download" download>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <div class="header-buttons">
+        <a href="events.json" class="btn-action" target="_blank">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          events.json
+        </a>
+        <a href="tradidancas2026.ics" class="btn-action btn-primary" download>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Baixar .ICS
         </a>
       </div>
@@ -449,11 +475,10 @@ html_template = """<!DOCTYPE html>
   </header>
 
   <main>
-    <!-- UNOFFICIAL DISCLAIMER BANNER -->
     <div class="disclaimer-banner">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
       <div>
-        <strong>Aviso Importante:</strong> Este website <strong>não é oficial</strong>. É uma ferramenta independente e comunitária criada a partir da programação pública. Para informações oficiais da organização, visite <a href="https://tradidancas.pt" target="_blank" rel="noopener">tradidancas.pt</a>.
+        <strong>Aviso Importante:</strong> Este website <strong>não é oficial</strong>. É uma ferramenta independente criada a partir da programação pública. Para a página oficial, visite <a href="https://tradidancas.pt" target="_blank" rel="noopener">tradidancas.pt</a>.
       </div>
     </div>
 
@@ -494,7 +519,7 @@ html_template = """<!DOCTYPE html>
   </main>
 
   <script>
-    const eventsData = JSON_EVENTS_DATA;
+    let eventsData = [];
 
     const dayFormat = {
       '2026-07-29': 'Qua, 29 Jul',
@@ -511,9 +536,7 @@ html_template = """<!DOCTYPE html>
     let searchQuery = '';
     let autoScrolled = false;
 
-    // Simulated / real reference date for current event calculations (2026-07-29 13:12:00)
     const now = new Date();
-    // Default reference date to festival start if current date is outside July 29 - August 3, 2026
     const refNow = (now.getFullYear() === 2026 && now.getMonth() === 6 && now.getDate() >= 29 && now.getDate() <= 31) || (now.getFullYear() === 2026 && now.getMonth() === 7 && now.getDate() <= 3)
       ? now 
       : new Date("2026-07-29T13:12:00");
@@ -550,7 +573,6 @@ html_template = """<!DOCTYPE html>
       });
     }
 
-    // Get URL query param
     function getQueryParam(param) {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(param);
@@ -602,11 +624,9 @@ html_template = """<!DOCTYPE html>
           card.classList.add('is-current');
           if (!currentElementToScroll) currentElementToScroll = card;
         } else if (!isPast && !currentElementToScroll) {
-          // Nearest upcoming event if none currently ongoing
           currentElementToScroll = card;
         }
 
-        // Check if shared via URL
         const isTargetShared = targetEventId && (targetEventId === evId || targetEventId === String(idx + 1));
         if (isTargetShared) {
           card.classList.add('expanded');
@@ -640,7 +660,6 @@ html_template = """<!DOCTYPE html>
           </div>
         `;
 
-        // Click to toggle description & set URL param
         card.addEventListener('click', () => {
           const isExpanded = card.classList.contains('expanded');
           document.querySelectorAll('.event-card.expanded').forEach(c => {
@@ -663,7 +682,6 @@ html_template = """<!DOCTYPE html>
         grid.appendChild(card);
       });
 
-      // Auto scroll logic: Target shared event OR current active event
       if (!autoScrolled) {
         autoScrolled = true;
         const elemToScroll = targetSharedElement || currentElementToScroll;
@@ -677,6 +695,19 @@ html_template = """<!DOCTYPE html>
         }
       }
     }
+
+    // Load events.json
+    fetch('events.json')
+      .then(res => res.json())
+      .then(data => {
+        eventsData = data;
+        initFilters();
+        renderEvents();
+      })
+      .catch(err => {
+        console.error('Error loading events.json:', err);
+        document.getElementById('eventsGrid').innerHTML = `<div class="no-results">Erro ao carregar o ficheiro events.json.</div>`;
+      });
 
     // Event Listeners
     document.getElementById('dayTabs').addEventListener('click', (e) => {
@@ -702,18 +733,12 @@ html_template = """<!DOCTYPE html>
       searchQuery = e.target.value.toLowerCase().trim();
       renderEvents();
     });
-
-    // Init
-    initFilters();
-    renderEvents();
   </script>
 </body>
 </html>
 """
 
-html_content = html_template.replace("JSON_EVENTS_DATA", json.dumps(events, ensure_ascii=False))
-
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(html_content)
 
-print("Updated index.html with fullwidth cards, click toggle, URL params, past event fading, and scroll to current hour.")
+print("Updated index.html to fetch events.json dynamically.")
