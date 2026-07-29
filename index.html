@@ -754,12 +754,22 @@
       (now.getFullYear() === 2026) &&
       ((now.getMonth() === 6 && now.getDate() >= 29) ||
        (now.getMonth() === 7 && now.getDate() <= 3));
-    const refNow = isFestival ? now : new Date('2026-07-29T13:12:00');
+    const refNow = isFestival ? now : new Date();
 
     function parseEventDt(dateStr, timeStr) {
       const [y, m, d] = dateStr.split('-').map(Number);
       const [h, min]  = timeStr.split(':').map(Number);
       return new Date(y, m - 1, d, h, min, 0);
+    }
+
+    function getDisplayDate(dateStr, timeStr) {
+      const [h] = timeStr.split(':').map(Number);
+      if (h >= 1 && h < 4) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        const prevDay = new Date(y, m - 1, d - 1);
+        return `${prevDay.getFullYear()}-${String(prevDay.getMonth() + 1).padStart(2, '0')}-${String(prevDay.getDate()).padStart(2, '0')}`;
+      }
+      return dateStr;
     }
 
     /* ── Populate dropdowns ── */
@@ -794,11 +804,14 @@
 
       const targetId = getParam('event');
       console.log('eventsData', eventsData);
-      const filtered = eventsData.sort((a, b) => {
-        if (a.date !== b.date) return a.date.localeCompare(b.date);
+      const filtered = eventsData.map(ev => ({
+        ...ev,
+        displayDate: getDisplayDate(ev.date, ev.start)
+      })).sort((a, b) => {
+        if (a.displayDate !== b.displayDate) return a.displayDate.localeCompare(b.displayDate);
         return a.start.localeCompare(b.start);
       }).filter(ev => {
-        if (currentDay   !== 'all' && ev.date !== currentDay)   return false;
+        if (currentDay   !== 'all' && ev.displayDate !== currentDay)   return false;
         if (currentStage !== 'all' && ev.loc  !== currentStage) return false;
         if (currentCat   !== 'all' && ev.cat  !== currentCat)   return false;
         if (searchQuery) {
@@ -829,11 +842,22 @@
         card.setAttribute('data-cat', ev.cat || '');
         card.setAttribute('role', 'listitem');
 
+        console.group('Event', evId, ev.title);
+
         const start   = parseEventDt(ev.date, ev.start);
         const end     = parseEventDt(ev.date, ev.end);
-        const isPast  = end   < refNow;
-        const isNow   = start <= refNow && refNow <= end;
-
+        if (end.getTime() < start.getTime()) {
+          // Event ends after midnight, add 1 day
+          end.setDate(end.getDate() + 1);
+        }
+        console.log('start', start);
+        console.log('end', end);
+        console.log('refNow', refNow);
+        const isPast  = end.getTime()   < refNow.getTime();
+        console.log('isPast', isPast);
+        const isNow   = start.getTime() <= refNow.getTime() && refNow.getTime() <= end.getTime();
+        console.log('isNow', isNow);
+        console.groupEnd();
         if (isPast) card.classList.add('is-past');
         if (isNow)  {
           card.classList.add('is-current');
