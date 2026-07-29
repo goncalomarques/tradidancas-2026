@@ -793,8 +793,11 @@
       grid.innerHTML = '';
 
       const targetId = getParam('event');
-
-      const filtered = eventsData.filter(ev => {
+      console.log('eventsData', eventsData);
+      const filtered = eventsData.sort((a, b) => {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        return a.start.localeCompare(b.start);
+      }).filter(ev => {
         if (currentDay   !== 'all' && ev.date !== currentDay)   return false;
         if (currentStage !== 'all' && ev.loc  !== currentStage) return false;
         if (currentCat   !== 'all' && ev.cat  !== currentCat)   return false;
